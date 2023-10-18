@@ -1,41 +1,57 @@
 import requests
 from bs4 import BeautifulSoup
 
-# URL = 'https://dblp.org/db/conf/uss/uss2023.html'
-# response = requests.get(URL)
 
-# soup = BeautifulSoup(response.content, 'html.parser')
-
-# main_div = soup.find('div', id='main')
-# uls = main_div.find_all('ul', class_='publ-list')
-
-# works = []
-# for ul in uls:
-#     lis = ul.find_all('li', class_='entry inproceedings')
-#     for li in lis:
-#         row = []
-#         data_div = li.find('cite', class_='data tts-content')
-#         if data_div:
-#             title_div = data_div.find('span', class_='title')
-#             if title_div:
-#                 row.append(title_div.text)
-#         # publ = li.find('nav', class_='publ')
-#         # if publ:
-#         #     ul = publ.find('ul')
-#         #     drop_down = ul.find('li')
-#         #     inner = drop_down.find('div', class_='head')
-#         #     link = inner.find('a')
-#         #     linked_page_response = requests.get(BASE_URL + link['href'])
-#         #     linked_page_soup = BeautifulSoup(linked_page_response.content, 'html.parser')
-
-#         #     link_main = linked_page_soup.find('main')
             
 
+def scrape(URL):
+    response = requests.get(URL)
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    main_div = soup.find('div', id='main')
+    uls = main_div.find_all('ul', class_='publ-list')
+
+    works = []
+    for ul in uls:
+        lis = ul.find_all('li', class_='entry inproceedings')
+        for li in lis:
+            try:
+                row = []
+                data_div = li.find('cite', class_='data tts-content')
+                if not data_div:
+                    continue
+                # find the title
+                title_div = data_div.find('span', class_='title')
+                if title_div:
+                    row.append(title_div.text)
+                publ = li.find('nav', class_='publ')
+                if not publ:
+                    continue
+                ul = publ.find('ul')
+                if not ul:
+                    continue
+                drop_down = ul.find('li')
+                if not drop_down:
+                    continue
+                inner = drop_down.find('div', class_='head')
+                if not inner:
+                    continue
+                link = inner.find('a')
+                if not link:
+                    continue
+                # print(link['href'])
+                row.append(getAbstract(link['href']))
+            except:
+                print(link)
+            works.append(row)
+
+    return works
 
 
-# print(len(works))
 
-def subLinkFetch(url):
+
+def getAbstract(url):
     res = requests.get(url)
     sub_soup = BeautifulSoup(res.content, 'html.parser')
     sub_body = sub_soup.find('body')
@@ -67,8 +83,17 @@ def subLinkFetch(url):
         # print('field items not found')
         return
     p_elements = field_items.find_all('p')
-    abstract = ' '.join([p.text for p in p_elements])
-    print(abstract)
+    return ' '.join([p.text for p in p_elements])
+    # print(abstract)
     
 
-subLinkFetch('https://www.usenix.org/conference/usenixsecurity23/presentation/wu-xinghui')
+if __name__ == "__main__":
+    # pass your url here in the argument to scrape()
+    works = scrape('https://dblp.org/db/conf/uss/uss2023.html')
+    for work in works:
+        print("Title:", work[0])
+        print("Abstract:", work[1])
+        print()
+
+    # for work in works:
+    #     print("Title:", work[0], "Abstract:", work[1])
