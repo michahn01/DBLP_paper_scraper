@@ -1,5 +1,16 @@
 import requests
 from bs4 import BeautifulSoup
+import openpyxl
+
+def write_to_excel(data, filename):
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+
+    for i, row in enumerate(data, 1):
+        for j, value in enumerate(row, 1):
+            worksheet.cell(row=i, column=j, value=value)
+
+    workbook.save(filename)
 
 def scrape(URL, num):
     response = requests.get(URL)
@@ -25,7 +36,7 @@ def scrape(URL, num):
                 # find the link to abstract
                 link = li.find('nav', class_='publ').find('ul').find('li').find('div', class_='head').find('a')
 
-                works.append([title_div.text, getAbstract(link['href'])])
+                works.append([link['href'], title_div.text, getAbstract(link['href'])])
                 i += 1
             except:
                 print("error at:", link)
@@ -48,11 +59,14 @@ def getAbstract(url):
 
 if __name__ == "__main__":
     # pass your url here in the argument to scrape()
-    works = scrape('https://dblp.org/db/conf/uss/uss2023.html', 423)
-    for work in works:
-        print("Title:", work[0])
-        print("Abstract:", work[1])
-        print()
+
+    # works = scrape('https://dblp.org/db/conf/uss/uss2023.html', 423)
+    works = scrape('https://dblp.org/db/conf/uss/uss2019.html', 114)
+
 
     # for work in works:
-    #     print("Title:", work[0], "Abstract:", work[1])
+    #     print("Title:", work[0])
+    #     print("Abstract:", work[1])
+    #     print()
+    write_to_excel(works, "usenix2019.xlsx")
+    
