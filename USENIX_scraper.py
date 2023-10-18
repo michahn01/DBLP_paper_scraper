@@ -40,33 +40,35 @@ def subLinkFetch(url):
     sub_soup = BeautifulSoup(res.content, 'html.parser')
     sub_body = sub_soup.find('body')
     if not sub_body:
-        print('body not found')
+        # print('body not found')
         return
     outermost_div = sub_body.find('div')
     if not outermost_div:
-        print('outermost div not found')
+        # print('outermost div not found')
         return
     main_div = outermost_div.find('main')
     if not main_div:
-        print("main not found")
+        # print("main not found")
         return
     content = main_div.find('section', id='content')
     if not content:
-        print('content not found')
+        # print('content not found')
         return 
     block_content = main_div.find('div', class_='block-content')
     if not block_content:
-        print('block content not found')
+        # print('block content not found')
         return 
     outer_div = block_content.find('div', class_='field field-name-field-paper-description field-type-text-long field-label-above')
     if not outer_div:
-        print('outer div not found')
+        # print('outer div not found')
         return
     field_items = outer_div.find('div', class_='field-items')
     if not field_items:
-        print('field items not found')
+        # print('field items not found')
         return
-    paragraphs = field_items.find_all('p')
+    p_elements = field_items.find_all('p')
+    abstract = ' '.join([p.text for p in p_elements])
+    print(abstract)
     
 
 subLinkFetch('https://www.usenix.org/conference/usenixsecurity23/presentation/wu-xinghui')
